@@ -7,7 +7,7 @@ on:
   pull_request:
     branches:
       - main
-ENV:
+env:
   NODE_ENV: 'production'
   DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
   DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
