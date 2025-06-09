@@ -27,6 +27,7 @@ jobs:
 
       - name: Run tests
         run: npm test
+        if:always() 
 
       - name: Create test results directory
         run: |
