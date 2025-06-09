@@ -1,0 +1,98 @@
+name: CI/CD Pipeline for Node.js App
+description: Builds, tests, and deploys a Node.js app to Kubernetes.
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch: # Allows manual triggering
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm' # Caches node_modules between runs
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run tests
+        run: npm test
+
+      - name: Create test results directory
+        run: |
+          mkdir -p test-results coverage
+
+      - name: Generate dummy test results (for demo)
+        run: |
+          echo "Test results" > test-results/results.txt
+          echo "<testsuite><testcase></testcase></testsuite>" > junit.xml
+          echo "Coverage report" > coverage/coverage.txt
+
+      - name: Archive test results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-results
+          path: |
+            test-results/
+            junit.xml
+            coverage/
+
+  # # Optional: Add a job to build Docker image and push to registry
+  # build-docker:
+  #   needs: build-test
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v3
+
+  #     - name: Set up Docker Buildx
+  #       uses: docker/setup-buildx-action@v2
+
+  #     - name: Login to Docker Hub
+  #       uses: docker/login-action@v2
+  #       with:
+  #         username: ${{ secrets.DOCKER_HUB_USERNAME }}
+  #         password: ${{ secrets.DOCKER_HUB_TOKEN }}
+
+  #     - name: Build and Push Docker Image
+  #       uses: docker/build-push-action@v5
+  #       with:
+  #         context: .
+  #         file: ./Dockerfile
+  #         push: true
+  #         tags: ${{ secrets.DOCKER_HUB_USERNAME }}/nodejs-app:latest
+
+  # # Optional: Deploy to Kubernetes
+  # deploy-k8s:
+  #   needs: build-docker
+  #   runs-on: ubuntu-latest
+  #   environment: production
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v3
+
+  #     - name: Setup Kubectl
+  #       uses: azure/setup-kubeconfig@v1
+  #       with:
+  #         creds: ${{ secrets.KUBECONFIG }}
+
+  #     - name: Deploy to Kubernetes
+  #       uses: azure/k8s-deploy@v1
+  #       with:
+  #         namespace: default
+  #         manifests: |
+  #           k8s/deployment.yaml
+  #           k8s/service.yaml
+  #         images: |
+  #           ${{ secrets.DOCKER_HUB_USERNAME }}/nodejs-app:latest
