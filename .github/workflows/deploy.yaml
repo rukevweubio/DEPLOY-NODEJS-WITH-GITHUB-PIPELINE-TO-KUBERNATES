@@ -49,6 +49,12 @@ jobs:
             test-results/
             junit.xml
             coverage/
+      -name: check the repository
+       run: |
+          echo "Checking repository status"
+          ls -la
+          ls -ltr
+
 
   # # Optional: Add a job to build Docker image and push to registry
   # build-docker:
