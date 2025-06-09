@@ -7,7 +7,10 @@ on:
   pull_request:
     branches:
       - main
-  #workflow_dispatch: # Allows manual triggering
+variables:
+  NODE_ENV: 'production'
+  DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+  DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
 
 jobs:
   build-test:
@@ -56,51 +59,51 @@ jobs:
           ls -ltr
 
 
-  # # Optional: Add a job to build Docker image and push to registry
-  # build-docker:
-  #   needs: build-test
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Checkout code
-  #       uses: actions/checkout@v3
+  # Optional: Add a job to build Docker image and push to registry
+  build-docker:
+    needs: build-test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-  #     - name: Set up Docker Buildx
-  #       uses: docker/setup-buildx-action@v2
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
 
-  #     - name: Login to Docker Hub
-  #       uses: docker/login-action@v2
-  #       with:
-  #         username: ${{ secrets.DOCKER_HUB_USERNAME }}
-  #         password: ${{ secrets.DOCKER_HUB_TOKEN }}
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
-  #     - name: Build and Push Docker Image
-  #       uses: docker/build-push-action@v5
-  #       with:
-  #         context: .
-  #         file: ./Dockerfile
-  #         push: true
-  #         tags: ${{ secrets.DOCKER_HUB_USERNAME }}/nodejs-app:latest
+      - name: Build and Push Docker Image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/nodejs-app:latest
 
-  # # Optional: Deploy to Kubernetes
-  # deploy-k8s:
-  #   needs: build-docker
-  #   runs-on: ubuntu-latest
-  #   environment: production
-  #   steps:
-  #     - name: Checkout code
-  #       uses: actions/checkout@v3
+  # Optional: Deploy to Kubernetes
+  deploy-k8s:
+    needs: build-docker
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-  #     - name: Setup Kubectl
-  #       uses: azure/setup-kubeconfig@v1
-  #       with:
-  #         creds: ${{ secrets.KUBECONFIG }}
+      - name: Setup Kubectl
+        uses: azure/setup-kubeconfig@v1
+        with:
+          creds: ${{ secrets.KUBECONFIG }}
 
-  #     - name: Deploy to Kubernetes
-  #       uses: azure/k8s-deploy@v1
-  #       with:
-  #         namespace: default
-  #         manifests: |
-  #           k8s/deployment.yaml
-  #           k8s/service.yaml
-  #         images: |
-  #           ${{ secrets.DOCKER_HUB_USERNAME }}/nodejs-app:latest
+      - name: Deploy to Kubernetes
+        uses: azure/k8s-deploy@v1
+        with:
+          namespace: default
+          manifests: |
+            k8s/deployment.yaml
+            k8s/service.yaml
+          images: |
+            ${{ secrets.DOCKER_HUB_USERNAME }}/nodejs-app:latest
