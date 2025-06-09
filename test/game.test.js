@@ -1,3 +1,4 @@
+const Game = require('../game-logic');
 const request = require('supertest');
 const http = require('http');
 const express = require('express');
