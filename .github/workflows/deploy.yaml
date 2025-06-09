@@ -8,7 +8,6 @@ on:
     branches:
       - main
 env:
-  NODE_ENV: 'production'
   DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
   DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
 
@@ -85,25 +84,25 @@ jobs:
           tags: ${{ secrets.DOCKER_USERNAME }}/nodejs-app:latest
 
   # Optional: Deploy to Kubernetes
-  deploy-k8s:
-    needs: build-docker
-    runs-on: ubuntu-latest
-    environment: production
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+  # deploy-k8s:
+  #   needs: build-docker
+  #   runs-on: ubuntu-latest
+  #   environment: production
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v3
 
-      - name: Setup Kubectl
-        uses: azure/setup-kubeconfig@v1
-        with:
-          creds: ${{ secrets.KUBECONFIG }}
+  #     - name: Setup Kubectl
+  #       uses: azure/setup-kubeconfig@v1
+  #       with:
+  #         creds: ${{ secrets.KUBECONFIG }}
 
-      - name: Deploy to Kubernetes
-        uses: azure/k8s-deploy@v1
-        with:
-          namespace: default
-          manifests: |
-            k8s/deployment.yaml
-            k8s/service.yaml
-          images: |
-            ${{ secrets.DOCKER_HUB_USERNAME }}/nodejs-app:latest
+  #     - name: Deploy to Kubernetes
+  #       uses: azure/k8s-deploy@v1
+  #       with:
+  #         namespace: default
+  #         manifests: |
+  #           k8s/deployment.yaml
+  #           k8s/service.yaml
+  #         images: |
+  #           ${{ secrets.DOCKER_HUB_USERNAME }}/nodejs-app:latest
