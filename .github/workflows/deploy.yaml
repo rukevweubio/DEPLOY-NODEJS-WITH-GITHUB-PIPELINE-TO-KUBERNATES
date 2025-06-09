@@ -49,8 +49,8 @@ jobs:
             test-results/
             junit.xml
             coverage/
-      -name: check the repository
-       run: |
+      - name: check the repository
+        run: |
           echo "Checking repository status"
           ls -la
           ls -ltr
