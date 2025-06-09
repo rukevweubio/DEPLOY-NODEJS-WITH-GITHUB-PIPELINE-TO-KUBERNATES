@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multiplayer Tic Tac Toe</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+        }
+
+        .container {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+            max-width: 500px;
+            width: 90%;
+        }
+
+        h1 {
+            margin-bottom: 1rem;
+            font-size: 2.5rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .game-info {
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+            min-height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .game-board {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin: 2rem auto;
+            max-width: 300px;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 20px;
+            border-radius: 15px;
+        }
+
+        .cell {
+            aspect-ratio: 1;
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            border-radius: 10px;
+            font-size: 2rem;
+            font-weight: bold;
+            color: #333;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .cell:hover:not(:disabled) {
+            background: rgba(255, 255, 255, 1);
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .cell:disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .cell.x {
+            color: #e74c3c;
+        }
+
+        .cell.o {
+            color: #3498db;
+        }
+
+        .controls {
+            margin-top: 2rem;
+        }
+
+        button {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a52);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 0 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .status {
+            margin: 1rem 0;
+            padding: 10px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .waiting {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+
+        .winner {
+            color: #f1c40f;
+            font-weight: bold;
+            animation: celebrate 0.5s ease-in-out;
+        }
+
+        @keyframes celebrate {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .connection-status {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+
+        .connected {
+            background: rgba(46, 204, 113, 0.9);
+        }
+
+        .disconnected {
+            background: rgba(231, 76, 60, 0.9);
+        }
+
+        .player-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        .player {
+            padding: 5px 10px;
+            border-radius: 15px;
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .player.active {
+            background: rgba(241, 196, 15, 0.3);
+            box-shadow: 0 0 10px rgba(241, 196, 15, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎮 Tic Tac Toe</h1>
+        
+        <div class="connection-status disconnected" id="connectionStatus">
+            Disconnected
+        </div>
+
+        <div class="game-info" id="gameInfo">
+            Click "Find Game" to start playing!
+        </div>
+
+        <div class="player-info" id="playerInfo" style="display: none;">
+            <div class="player" id="player1">Player 1 (X)</div>
+            <div class="player" id="player2">Player 2 (O)</div>
+        </div>
+
+        <div class="game-board" id="gameBoard">
+            <button class="cell" data-index="0"></button>
+            <button class="cell" data-index="1"></button>
+            <button class="cell" data-index="2"></button>
+            <button class="cell" data-index="3"></button>
+            <button class="cell" data-index="4"></button>
+            <button class="cell" data-index="5"></button>
+            <button class="cell" data-index="6"></button>
+            <button class="cell" data-index="7"></button>
+            <button class="cell" data-index="8"></button>
+        </div>
+
+        <div class="controls">
+            <button id="findGameBtn">Find Game</button>
+            <button id="resetBtn" style="display: none;">New Game</button>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        class TicTacToeClient {
+            constructor() {
+                this.socket = io();
+                this.gameState = null;
+                this.playerIndex = -1;
+                this.setupEventListeners();
+                this.setupSocketEvents();
+            }
+
+            setupEventListeners() {
+                // Find game button
+                document.getElementById('findGameBtn').addEventListener('click', () => {
+                    this.findGame();
+                });
+
+                // Reset button
+                document.getElementById('resetBtn').addEventListener('click', () => {
+                    this.resetGame();
+                });
+
+                // Game board cells
+                document.querySelectorAll('.cell').forEach(cell => {
+                    cell.addEventListener('click', (e) => {
+                        const index = parseInt(e.target.dataset.index);
+                        this.makeMove(index);
+                    });
+                });
+            }
+
+            setupSocketEvents() {
+                this.socket.on('connect', () => {
+                    this.updateConnectionStatus(true);
+                });
+
+                this.socket.on('disconnect', () => {
+                    this.updateConnectionStatus(false);
+                    this.updateGameInfo('Disconnected from server');
+                });
+
+                this.socket.on('waitingForPlayer', () => {
+                    this.updateGameInfo('Waiting for another player...', 'waiting');
+                    document.getElementById('findGameBtn').style.display = 'none';
+                });
+
+                this.socket.on('gameStart', (gameState) => {
+                    this.gameState = gameState;
+                    this.playerIndex = gameState.players.findIndex(p => p.id === this.socket.id);
+                    this.updateGameDisplay();
+                    this.updateGameInfo(`Game started! You are ${gameState.players[this.playerIndex].symbol}`);
+                    document.getElementById('playerInfo').style.display = 'flex';
+                    document.getElementById('resetBtn').style.display = 'inline-block';
+                });
+
+                this.socket.on('gameUpdate', (gameState) => {
+                    this.gameState = gameState;
+                    this.updateGameDisplay();
+                });
+
+                this.socket.on('playerDisconnected', () => {
+                    this.updateGameInfo('Other player disconnected');
+                    this.resetUI();
+                });
+            }
+
+            findGame() {
+                this.socket.emit('findGame');
+                document.getElementById('findGameBtn').disabled = true;
+            }
+
+            makeMove(position) {
+                if (!this.gameState || this.gameState.gameOver) return;
+                if (this.gameState.currentPlayer !== this.playerIndex) return;
+                if (this.gameState.board[position] !== null) return;
+
+                this.socket.emit('makeMove', position);
+            }
+
+            resetGame() {
+                this.socket.emit('resetGame');
+            }
+
+            updateGameDisplay() {
+                if (!this.gameState) return;
+
+                // Update board
+                const cells = document.querySelectorAll('.cell');
+                cells.forEach((cell, index) => {
+                    const value = this.gameState.board[index];
+                    cell.textContent = value || '';
+                    cell.className = 'cell';
+                    if (value) {
+                        cell.classList.add(value.toLowerCase());
+                        cell.disabled = true;
+                    } else {
+                        cell.disabled = this.gameState.gameOver || this.gameState.currentPlayer !== this.playerIndex;
+                    }
+                });
+
+                // Update player info
+                const player1 = document.getElementById('player1');
+                const player2 = document.getElementById('player2');
+                
+                player1.classList.toggle('active', this.gameState.currentPlayer === 0 && !this.gameState.gameOver);
+                player2.classList.toggle('active', this.gameState.currentPlayer === 1 && !this.gameState.gameOver);
+
+                // Update game status
+                if (this.gameState.gameOver) {
+                    if (this.gameState.winner !== null) {
+                        const winnerSymbol = this.gameState.players[this.gameState.winner].symbol;
+                        const isWinner = this.gameState.winner === this.playerIndex;
+                        this.updateGameInfo(
+                            isWinner ? `🎉 You Win! (${winnerSymbol})` : `😔 You Lose! (${winnerSymbol} wins)`,
+                            'winner'
+                        );
+                    } else {
+                        this.updateGameInfo("🤝 It's a Draw!", 'winner');
+                    }
+                } else {
+                    const currentPlayerSymbol = this.gameState.players[this.gameState.currentPlayer].symbol;
+                    const isMyTurn = this.gameState.currentPlayer === this.playerIndex;
+                    this.updateGameInfo(
+                        isMyTurn ? `Your turn (${currentPlayerSymbol})` : `Opponent's turn (${currentPlayerSymbol})`
+                    );
+                }
+            }
+
+            updateGameInfo(message, className = '') {
+                const gameInfo = document.getElementById('gameInfo');
+                gameInfo.textContent = message;
+                gameInfo.className = `game-info ${className}`;
+            }
+
+            updateConnectionStatus(connected) {
+                const status = document.getElementById('connectionStatus');
+                status.textContent = connected ? 'Connected' : 'Disconnected';
+                status.className = `connection-status ${connected ? 'connected' : 'disconnected'}`;
+            }
+
+            resetUI() {
+                document.getElementById('findGameBtn').style.display = 'inline-block';
+                document.getElementById('findGameBtn').disabled = false;
+                document.getElementById('resetBtn').style.display = 'none';
+                document.getElementById('playerInfo').style.display = 'none';
+                
+                // Clear board
+                document.querySelectorAll('.cell').forEach(cell => {
+                    cell.textContent = '';
+                    cell.className = 'cell';
+                    cell.disabled = false;
+                });
+
+                this.gameState = null;
+                this.playerIndex = -1;
+            }
+        }
+
+        // Initialize the game when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new TicTacToeClient();
+        });
+    </script>
+</body>
+</html>
