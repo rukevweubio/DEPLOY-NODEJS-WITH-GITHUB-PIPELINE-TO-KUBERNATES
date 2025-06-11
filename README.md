@@ -82,3 +82,8 @@ git push origin main
 
 ```
 ![docker image in docker hub](https://github.com/rukevweubio/DEPLOY-NODEJS-WITH-GITHUB-PIPELINE-TO-KUBERNATES/blob/main/picture/Screenshot%20(1067).png)
+## the nodejs app
+![nodejs tic tac game](https://github.com/rukevweubio/DEPLOY-NODEJS-WITH-GITHUB-PIPELINE-TO-KUBERNATES/blob/main/picture/Screenshot%20(1062).png)
+## the aks cluster running
+![aks pods running](https://github.com/rukevweubio/DEPLOY-NODEJS-WITH-GITHUB-PIPELINE-TO-KUBERNATES/blob/main/picture/Screenshot%20(1061).png)
+![aks pod running](https://github.com/rukevweubio/DEPLOY-NODEJS-WITH-GITHUB-PIPELINE-TO-KUBERNATES/blob/main/picture/Screenshot%20(1060).png)
