@@ -57,6 +57,7 @@ az aks update \
 az aks get-credentials --resource-group myResourceGroup --name myAKSCluster
 kubectl get nodes
 ```
+![aks cluster](https://github.com/rukevweubio/DEPLOY-NODEJS-WITH-GITHUB-PIPELINE-TO-KUBERNATES/blob/main/picture/Screenshot%20(1068).png)
 ## Configure GitHub Actions Secrets
 Go to your GitHub repository > Settings > Secrets and variables > Actions > New repository secret.
 Add the following secrets:
