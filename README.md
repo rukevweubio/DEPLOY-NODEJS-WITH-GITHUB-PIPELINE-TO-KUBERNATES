@@ -87,3 +87,7 @@ git push origin main
 ## the aks cluster running
 ![aks pods running](https://github.com/rukevweubio/DEPLOY-NODEJS-WITH-GITHUB-PIPELINE-TO-KUBERNATES/blob/main/picture/Screenshot%20(1061).png)
 ![aks pod running](https://github.com/rukevweubio/DEPLOY-NODEJS-WITH-GITHUB-PIPELINE-TO-KUBERNATES/blob/main/picture/Screenshot%20(1060).png)
+
+## Github pipeline build 
+![github pipeline](https://github.com/rukevweubio/DEPLOY-NODEJS-WITH-GITHUB-PIPELINE-TO-KUBERNATES/blob/main/picture/Screenshot%20(1115).png)
+![github pipeline](https://github.com/rukevweubio/DEPLOY-NODEJS-WITH-GITHUB-PIPELINE-TO-KUBERNATES/blob/main/picture/Screenshot%20(1116).png)
